@@ -1,8 +1,12 @@
+using ImageProcess2;
+using WebCamLib;
+
 namespace Image_Processing
 {
     public partial class Form1 : Form
     {
         Bitmap loaded, processed;
+        Device[] mgaDevice;
 
         public Form1()
         {
@@ -11,7 +15,7 @@ namespace Image_Processing
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            mgaDevice = DeviceManager.GetAllDevices();
         }
 
         private void openFileDialog1_FileOk_1(object sender, System.ComponentModel.CancelEventArgs e)
@@ -166,6 +170,58 @@ namespace Image_Processing
                 }
             }
             pictureBox2.Image = processed;
+        }
+
+        private void sepiaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            processed = new Bitmap(loaded.Width, loaded.Height);
+            Color pixel;
+            for (int x = 0; x < loaded.Width; x++)
+            {
+                for (int y = 0; y < loaded.Height; y++)
+                {
+                    pixel = loaded.GetPixel(x, y);
+                    int r = Math.Min(255, (int)(0.393 * pixel.R + 0.769 * pixel.G + 0.189 * pixel.B));
+                    int g = Math.Min(255, (int)(0.349 * pixel.R + 0.686 * pixel.G + 0.168 * pixel.B));
+                    int b = Math.Min(255, (int)(0.272 * pixel.R + 0.534 * pixel.G + 0.131 * pixel.B));
+
+                    processed.SetPixel(x, y, Color.FromArgb(r, g, b));
+                }
+            }
+            pictureBox2.Image = processed;
+        }
+
+        private void subtractionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form form2 = new Form2();
+            form2.Show();
+        }
+
+        private void onToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mgaDevice[0].ShowWindow(pictureBox1);
+        }
+
+        private void offToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mgaDevice[0].Stop();
+        }
+
+        private void greyscaleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            timer1.Enabled = true;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            IDataObject data;
+            Image bmap;
+            mgaDevice[0].Sendmessage();
+            data = Clipboard.GetDataObject();
+            bmap = (Image)(data.GetData("System.Drawing.Bitmap", true));
+            Bitmap b = new Bitmap(bmap);
+            BitmapFilter.GrayScale(b);
+            pictureBox2.Image = b;
         }
     }
 }

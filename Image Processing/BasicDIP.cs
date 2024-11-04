@@ -68,6 +68,8 @@ namespace Image_Processing
             int[] hist = new int[256];
             int percent = degree;
 
+            Bitmap temp = new Bitmap(a);
+
             // compute the histogram from the sub-image
             Color nakuha;
             Color gray;
@@ -80,7 +82,7 @@ namespace Image_Processing
                     nakuha = a.GetPixel(x, y);
                     graydata = (byte)((nakuha.R + nakuha.G + nakuha.B) / 3);
                     gray = Color.FromArgb(graydata, graydata, graydata);
-                    a.SetPixel(x, y, gray);
+                    temp.SetPixel(x, y, gray);
                 }
             }
 
@@ -89,7 +91,7 @@ namespace Image_Processing
             {
                 for (int y = 0; y < height; y++)
                 {
-                    nakuha = a.GetPixel(x, y);
+                    nakuha = temp.GetPixel(x, y);
                     hist[nakuha.R]++;
                 }
             }
@@ -119,8 +121,8 @@ namespace Image_Processing
             {
                 for (int x = 0; x < width; x++)
                 {
-                    Color temp = Color.FromArgb(Ymap[a.GetPixel(x, y).R], Ymap[a.GetPixel(x, y).R], Ymap[a.GetPixel(x, y).R]);
-                    b.SetPixel(x, y, temp);
+                    Color color = Color.FromArgb(Ymap[a.GetPixel(x, y).R], Ymap[a.GetPixel(x, y).R], Ymap[a.GetPixel(x, y).R]);
+                    b.SetPixel(x, y, color);
                 }
             }
         }
@@ -152,28 +154,31 @@ namespace Image_Processing
 
         public static void Hist(ref Bitmap a, ref Bitmap b)
         {
+            // Create a copy of the original image to work on
+            Bitmap temp = new Bitmap(a);
+
             Color sample;
             Color gray;
             Byte graydata;
 
-            for (int x = 0; x < a.Width; x++)
+            for (int x = 0; x < temp.Width; x++)
             {
-                for (int y = 0; y < a.Height; y++)
+                for (int y = 0; y < temp.Height; y++)
                 {
-                    sample = a.GetPixel(x, y);
+                    sample = temp.GetPixel(x, y);
                     graydata = (byte)((sample.R + sample.G + sample.B) / 3);
                     gray = Color.FromArgb(graydata, graydata, graydata);
-                    a.SetPixel(x, y, gray);
+                    temp.SetPixel(x, y, gray);
                 }
             }
 
             int[] histdata = new int[256];
 
-            for (int x = 0; x < a.Width; x++)
+            for (int x = 0; x < temp.Width; x++)
             {
-                for (int y = 0; y < a.Height; y++)
+                for (int y = 0; y < temp.Height; y++)
                 {
-                    sample = a.GetPixel(x, y);
+                    sample = temp.GetPixel(x, y);
                     histdata[sample.R]++;
                 }
             }
