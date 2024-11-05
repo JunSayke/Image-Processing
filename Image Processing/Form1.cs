@@ -141,7 +141,7 @@ namespace Image_Processing
             form2.Show();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void webcamLoop_Tick(object sender, EventArgs e)
         {
             IDataObject data;
             Image bmap;

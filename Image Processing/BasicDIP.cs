@@ -97,6 +97,25 @@ namespace Image_Processing
             }
         }
 
+        public static void GreenScreen(ref Bitmap a, ref Bitmap b, ref Bitmap c, int threshold)
+        {
+            Color mygreen = Color.FromArgb(0, 255, 0);
+            int greygreen = (mygreen.R + mygreen.G + mygreen.B) / 3;
+
+            for (int x = 0; x < b.Width; x++)
+                for (int y = 0; y < b.Height; y++)
+                {
+                    Color pixel = a.GetPixel(x, y);
+                    Color backpixel = b.GetPixel(x, y);
+                    int grey = (pixel.R + pixel.G + pixel.B) / 3;
+                    int subtractvalue = Math.Abs(grey - greygreen);
+                    if (subtractvalue < threshold)
+                        c.SetPixel(x, y, backpixel);
+                    else
+                        c.SetPixel(x, y, pixel);
+                }
+        }
+
         public static void Scale(ref Bitmap a, ref Bitmap b, int nwidth, int nheight)
         {
             int targetWidth = nwidth;

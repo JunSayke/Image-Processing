@@ -265,7 +265,7 @@
             // 
             // webcamLoop
             // 
-            webcamLoop.Tick += timer1_Tick;
+            webcamLoop.Tick += webcamLoop_Tick;
             // 
             // Form1
             // 

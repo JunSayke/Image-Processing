@@ -7,12 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WebCamLib;
 
 namespace Image_Processing
 {
     public partial class Form2 : Form
     {
         Bitmap imageA, imageB;
+        Device[] mgaDevice;
+
         public Form2()
         {
             InitializeComponent();
@@ -20,44 +23,42 @@ namespace Image_Processing
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (imageA.Width != imageB.Width || imageA.Height != imageB.Height)
-            {
-                DialogResult result = MessageBox.Show("Images must have the same dimensions. Do you want to resize them?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (result == DialogResult.No)
-                {
-                    return;
-                }
+            Subtract();
+        }
 
-                int maxwidth = Math.Max(imageA.Width, imageB.Width);
-                int maxheight = Math.Max(imageA.Height, imageB.Height);
-                Bitmap newImageA = new Bitmap(maxwidth, maxheight);
-                Bitmap newImageB = new Bitmap(maxwidth, maxheight);
-                BasicDIP.Scale(ref imageA, ref newImageA, maxwidth, maxheight);
-                BasicDIP.Scale(ref imageB, ref newImageB, maxwidth, maxheight);
-                imageA = newImageA;
-                imageB = newImageB;
+        private void Subtract()
+        {
+            if (imageA == null)
+            {
+                MessageBox.Show("Please load an image first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (imageB == null)
+            {
+                MessageBox.Show("Please load a background first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
-            Color mygreen = Color.FromArgb(0, 255, 0);
-            int greygreen = (mygreen.R + mygreen.G + mygreen.B) / 3;
-            int threshold = 5;
-
-            Bitmap resultImage = new Bitmap(imageB.Width, imageB.Height);
-
-            for (int x = 0; x < imageB.Width; x++) 
-                for (int y = 0; y < imageB.Height; y++)
+            // Make sure the images are the same size
+            if (imageA.Width != imageB.Width || imageA.Height != imageB.Height)
+            {   
+                if (!webcamLoop.Enabled)
                 {
-                    Color pixel = imageA.GetPixel(x, y);
-                    Color backpixel = imageB.GetPixel(x, y);
-                    int grey = (pixel.R + pixel.G + pixel.B) / 3;
-                    int subtractvalue = Math.Abs(grey - greygreen);
-                    if (subtractvalue < threshold)
-                        resultImage.SetPixel(x, y, backpixel);
-                    else
-                        resultImage.SetPixel(x, y, pixel);
-
+                    DialogResult result = MessageBox.Show("Images must have the same dimensions. Do you want to resize them?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (result == DialogResult.No)
+                    {
+                        return;
+                    }
                 }
-            pictureBox3.Image = resultImage;
+                
+                Bitmap newImageA = new Bitmap(imageB.Width, imageB.Height);
+                BasicDIP.Scale(ref imageA, ref newImageA, imageB.Width, imageB.Height);
+                imageA = newImageA;
+            }
+
+            Bitmap output = new Bitmap(imageA.Width, imageA.Height);
+            BasicDIP.GreenScreen(ref imageA, ref imageB, ref output, 5);
+            pictureBox3.Image = output;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -69,6 +70,11 @@ namespace Image_Processing
         {
             imageA = new Bitmap(openFileDialog1.FileName);
             pictureBox1.Image = imageA;
+            if (webcamLoop.Enabled)
+            {
+                mgaDevice[0].Stop();
+                webcamLoop.Enabled = false;
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -80,6 +86,41 @@ namespace Image_Processing
         {
             imageB = new Bitmap(openFileDialog2.FileName);
             pictureBox2.Image = imageB;
+        }
+
+        private void webcamLoop_Tick(object sender, EventArgs e)
+        {
+            IDataObject data;
+            Image bmap;
+
+            mgaDevice[0].Sendmessage();
+            data = Clipboard.GetDataObject();
+
+            bmap = (Image)(data.GetData("System.Drawing.Bitmap", true));
+
+            if (bmap != null)
+            {
+                Bitmap b = new Bitmap(bmap);
+                imageA = b;
+                Subtract();
+            }
+        }
+
+        private void Form2_Load(object sender, EventArgs e)
+        {
+            mgaDevice = DeviceManager.GetAllDevices();
+        }
+
+        private void onToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mgaDevice[0].ShowWindow(pictureBox1);
+            webcamLoop.Enabled = true;
+        }
+
+        private void offToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mgaDevice[0].Stop();
+            webcamLoop.Enabled = false;
         }
     }
 }

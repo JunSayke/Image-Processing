@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             pictureBox1 = new PictureBox();
             button1 = new Button();
             button2 = new Button();
@@ -36,9 +37,15 @@
             pictureBox3 = new PictureBox();
             openFileDialog1 = new OpenFileDialog();
             openFileDialog2 = new OpenFileDialog();
+            webcamLoop = new System.Windows.Forms.Timer(components);
+            menuStrip1 = new MenuStrip();
+            webcamToolStripMenuItem = new ToolStripMenuItem();
+            onToolStripMenuItem = new ToolStripMenuItem();
+            offToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // pictureBox1
@@ -114,6 +121,40 @@
             openFileDialog2.FileName = "openFileDialog2";
             openFileDialog2.FileOk += openFileDialog2_FileOk;
             // 
+            // webcamLoop
+            // 
+            webcamLoop.Tick += webcamLoop_Tick;
+            // 
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new ToolStripItem[] { webcamToolStripMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(1022, 24);
+            menuStrip1.TabIndex = 6;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // webcamToolStripMenuItem
+            // 
+            webcamToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { onToolStripMenuItem, offToolStripMenuItem });
+            webcamToolStripMenuItem.Name = "webcamToolStripMenuItem";
+            webcamToolStripMenuItem.Size = new Size(66, 20);
+            webcamToolStripMenuItem.Text = "Webcam";
+            // 
+            // onToolStripMenuItem
+            // 
+            onToolStripMenuItem.Name = "onToolStripMenuItem";
+            onToolStripMenuItem.Size = new Size(180, 22);
+            onToolStripMenuItem.Text = "On";
+            onToolStripMenuItem.Click += onToolStripMenuItem_Click;
+            // 
+            // offToolStripMenuItem
+            // 
+            offToolStripMenuItem.Name = "offToolStripMenuItem";
+            offToolStripMenuItem.Size = new Size(180, 22);
+            offToolStripMenuItem.Text = "Off";
+            offToolStripMenuItem.Click += offToolStripMenuItem_Click;
+            // 
             // Form2
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -125,12 +166,18 @@
             Controls.Add(pictureBox2);
             Controls.Add(button1);
             Controls.Add(pictureBox1);
+            Controls.Add(menuStrip1);
+            MainMenuStrip = menuStrip1;
             Name = "Form2";
             Text = "Form2";
+            Load += Form2_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -143,5 +190,10 @@
         private PictureBox pictureBox3;
         private OpenFileDialog openFileDialog1;
         private OpenFileDialog openFileDialog2;
+        private System.Windows.Forms.Timer webcamLoop;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem webcamToolStripMenuItem;
+        private ToolStripMenuItem onToolStripMenuItem;
+        private ToolStripMenuItem offToolStripMenuItem;
     }
 }
