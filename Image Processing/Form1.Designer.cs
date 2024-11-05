@@ -48,15 +48,14 @@
             subtractionToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1 = new MenuStrip();
             onToolStripMenuItem = new ToolStripMenuItem();
-            offToolStripMenuItem = new ToolStripMenuItem();
-            vIDEOToolStripMenuItem = new ToolStripMenuItem();
-            greyscaleToolStripMenuItem = new ToolStripMenuItem();
+            onToolStripMenuItem1 = new ToolStripMenuItem();
+            offToolStripMenuItem1 = new ToolStripMenuItem();
             saveFileDialog1 = new SaveFileDialog();
             openFileDialog1 = new OpenFileDialog();
             trackBar1 = new TrackBar();
             trackBar2 = new TrackBar();
             trackBar3 = new TrackBar();
-            timer1 = new System.Windows.Forms.Timer(components);
+            webcamLoop = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             menuStrip1.SuspendLayout();
@@ -97,14 +96,14 @@
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(103, 22);
+            openToolStripMenuItem.Size = new Size(180, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(103, 22);
+            saveToolStripMenuItem.Size = new Size(180, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
@@ -194,7 +193,7 @@
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, dIPToolStripMenuItem, onToolStripMenuItem, offToolStripMenuItem, vIDEOToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, dIPToolStripMenuItem, onToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(800, 24);
@@ -203,31 +202,24 @@
             // 
             // onToolStripMenuItem
             // 
+            onToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { onToolStripMenuItem1, offToolStripMenuItem1 });
             onToolStripMenuItem.Name = "onToolStripMenuItem";
-            onToolStripMenuItem.Size = new Size(33, 20);
-            onToolStripMenuItem.Text = "on";
-            onToolStripMenuItem.Click += onToolStripMenuItem_Click;
+            onToolStripMenuItem.Size = new Size(66, 20);
+            onToolStripMenuItem.Text = "Webcam";
             // 
-            // offToolStripMenuItem
+            // onToolStripMenuItem1
             // 
-            offToolStripMenuItem.Name = "offToolStripMenuItem";
-            offToolStripMenuItem.Size = new Size(34, 20);
-            offToolStripMenuItem.Text = "off";
-            offToolStripMenuItem.Click += offToolStripMenuItem_Click;
+            onToolStripMenuItem1.Name = "onToolStripMenuItem1";
+            onToolStripMenuItem1.Size = new Size(91, 22);
+            onToolStripMenuItem1.Text = "On";
+            onToolStripMenuItem1.Click += onToolStripMenuItem1_Click;
             // 
-            // vIDEOToolStripMenuItem
+            // offToolStripMenuItem1
             // 
-            vIDEOToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { greyscaleToolStripMenuItem });
-            vIDEOToolStripMenuItem.Name = "vIDEOToolStripMenuItem";
-            vIDEOToolStripMenuItem.Size = new Size(52, 20);
-            vIDEOToolStripMenuItem.Text = "VIDEO";
-            // 
-            // greyscaleToolStripMenuItem
-            // 
-            greyscaleToolStripMenuItem.Name = "greyscaleToolStripMenuItem";
-            greyscaleToolStripMenuItem.Size = new Size(180, 22);
-            greyscaleToolStripMenuItem.Text = "Greyscale";
-            greyscaleToolStripMenuItem.Click += greyscaleToolStripMenuItem_Click;
+            offToolStripMenuItem1.Name = "offToolStripMenuItem1";
+            offToolStripMenuItem1.Size = new Size(91, 22);
+            offToolStripMenuItem1.Text = "Off";
+            offToolStripMenuItem1.Click += offToolStripMenuItem1_Click;
             // 
             // saveFileDialog1
             // 
@@ -271,9 +263,9 @@
             trackBar3.TabIndex = 5;
             trackBar3.Scroll += trackBar3_Scroll;
             // 
-            // timer1
+            // webcamLoop
             // 
-            timer1.Tick += timer1_Tick;
+            webcamLoop.Tick += timer1_Tick;
             // 
             // Form1
             // 
@@ -324,11 +316,10 @@
         private ToolStripMenuItem scaleToolStripMenuItem;
         private ToolStripMenuItem binaryToolStripMenuItem;
         private ToolStripMenuItem onToolStripMenuItem;
-        private ToolStripMenuItem offToolStripMenuItem;
-        private ToolStripMenuItem vIDEOToolStripMenuItem;
         private ToolStripMenuItem sepiaToolStripMenuItem;
         private ToolStripMenuItem subtractionToolStripMenuItem;
-        private ToolStripMenuItem greyscaleToolStripMenuItem;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer webcamLoop;
+        private ToolStripMenuItem onToolStripMenuItem1;
+        private ToolStripMenuItem offToolStripMenuItem1;
     }
 }

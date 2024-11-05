@@ -10,6 +10,93 @@ namespace Image_Processing
 {
     class BasicDIP
     {
+        public static void PixelCopy(ref Bitmap a, ref Bitmap b)
+        {
+            b = new Bitmap(a.Width, a.Height);
+            for (int x = 0; x < a.Width; x++)
+            {
+                for (int y = 0; y < a.Height; y++)
+                {
+                    b.SetPixel(x, y, a.GetPixel(x, y));
+                }
+            }
+        }
+
+        public static void Inversion(ref Bitmap a, ref Bitmap b)
+        {
+            b = new Bitmap(a.Width, a.Height);
+            for (int x = 0; x < a.Width; x++)
+            {
+                for (int y = 0; y < a.Height; y++)
+                {
+                    Color pixel = a.GetPixel(x, y);
+                    b.SetPixel(x, y, Color.FromArgb(255 - pixel.R, 255 - pixel.G, 255 - pixel.B));
+                }
+            }
+        }
+
+        public static void MirrorVertical(ref Bitmap a, ref Bitmap b)
+        {
+            b = new Bitmap(a.Width, a.Height);
+            for (int x = 0; x < a.Width; x++)
+            {
+                for (int y = 0; y < a.Height; y++)
+                {
+                    b.SetPixel(x, y, a.GetPixel(x, a.Height - 1 - y));
+                }
+            }
+        }
+
+        public static void Binary(ref Bitmap a, ref Bitmap b)
+        {
+            b = new Bitmap(a.Width, a.Height);
+            for (int x = 0; x < a.Width; x++)
+            {
+                for (int y = 0; y < a.Height; y++)
+                {
+                    Color pixel = a.GetPixel(x, y);
+                    int gray = (pixel.R + pixel.G + pixel.B) / 3;
+                    if (gray > 127)
+                    {
+                        b.SetPixel(x, y, Color.White);
+                    }
+                    else
+                    {
+                        b.SetPixel(x, y, Color.Black);
+                    }
+                }
+            }
+        }
+
+        public static void Sepia(ref Bitmap a, ref Bitmap b) {
+            b = new Bitmap(a.Width, a.Height);
+            Color pixel;
+            for (int x = 0; x < a.Width; x++)
+            {
+                for (int y = 0; y < a.Height; y++)
+                {
+                    pixel = a.GetPixel(x, y);
+                    int red = Math.Min(255, (int)(0.393 * pixel.R + 0.769 * pixel.G + 0.189 * pixel.B));
+                    int green = Math.Min(255, (int)(0.349 * pixel.R + 0.686 * pixel.G + 0.168 * pixel.B));
+                    int blue = Math.Min(255, (int)(0.272 * pixel.R + 0.534 * pixel.G + 0.131 * pixel.B));
+
+                    b.SetPixel(x, y, Color.FromArgb(red, green, blue));
+                }
+            }
+        }
+
+        public static void MirrorHorizontal(ref Bitmap a, ref Bitmap b) 
+        {
+            b = new Bitmap(a.Width, a.Height);
+            for (int x = 0; x < a.Width; x++)
+            {
+                for (int y = 0; y < a.Height; y++)
+                {
+                    b.SetPixel(x, y, a.GetPixel(a.Width - 1 - x, y));
+                }
+            }
+        }
+
         public static void Scale(ref Bitmap a, ref Bitmap b, int nwidth, int nheight)
         {
             int targetWidth = nwidth;
