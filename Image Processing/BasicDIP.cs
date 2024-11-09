@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageProcess2;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -136,9 +137,11 @@ namespace Image_Processing
             }
         }
 
+
         public static void Rotate(ref Bitmap a, ref Bitmap b, int value)
         {
-            float angleRadians = (float)(value * Math.PI / 180);
+            //float angleRadians = (float)(value * Math.PI / 180);
+            float angleRadians = (float)value;
             int xCenter = (int)(a.Width / 2);
             int yCenter = (int)(a.Height / 2);
             int width, height, xs, ys, xp, yp, x0, y0;
@@ -156,8 +159,10 @@ namespace Image_Processing
                     y0 = yp - yCenter;
                     xs = (int)(x0 * cosA + y0 * sinA); // rotate around the origin
                     ys = (int)(-x0 * sinA + y0 * cosA);
-                    xs += (int)(xs + xCenter); // translate back to (xCenter, yCenter)
-                    ys += (int)(ys + yCenter);
+                    //xs += (int)(xs + xCenter); // translate back to (xCenter, yCenter)
+                    //ys += (int)(ys + yCenter);
+                    xs = (int)(xs + xCenter); // translate back to (xCenter, yCenter)
+                    ys = (int)(ys + yCenter);
                     xs = Math.Max(0, Math.Min(width - 1, xs)); // force the source point to be within the image
                     ys = Math.Max(0, Math.Min(height - 1, ys));
                     b.SetPixel(xp, yp, a.GetPixel(xs, ys));
@@ -306,6 +311,69 @@ namespace Image_Processing
                     b.SetPixel(x, (b.Height - 1) - y, Color.Black);
                 }
             }
+        }
+
+        public enum EMBOSS { HORIZONTAL_VERTICAL, ALL_DIRECTION, LOSSY, HORIZONTAL_ONLY, VERTICAL_ONLY };
+        
+
+        public static bool Emboss(Bitmap b, EMBOSS nType)
+        {
+            ConvMatrix m = new ConvMatrix();
+
+            switch(nType)
+            {
+                case EMBOSS.HORIZONTAL_VERTICAL:
+                    m.SetAll(0);
+                    m.TopMid = m.MidLeft = m.MidRight = m.BottomMid = -1;
+                    m.Pixel = 4;
+                    m.Offset = 127;
+                    break;
+                case EMBOSS.ALL_DIRECTION:
+                    m.SetAll(-1);
+                    m.Pixel = 8;
+                    m.Offset = 127;
+                    break;
+                case EMBOSS.LOSSY:
+                    m.SetAll(-2);
+                    m.TopLeft = m.TopRight = m.BottomMid = 1;
+                    m.Pixel = 4;
+                    m.Offset = 127;
+                    break;
+                case EMBOSS.HORIZONTAL_ONLY:
+                    m.SetAll(0);
+                    m.MidLeft = m.MidRight = -1;
+                    m.Pixel = 2;
+                    m.Offset = 127;
+                    break;
+                case EMBOSS.VERTICAL_ONLY:
+                    m.SetAll(0);
+                    m.TopMid = -1;
+                    m.BottomMid = 1;
+                    m.Offset = 127;
+                    break;
+            }
+
+            return BitmapFilter.Conv3x3(b, m);
+        }
+
+        public static bool EdgeDetect(Bitmap b)
+        {
+            ConvMatrix m = new ConvMatrix();
+            m.SetAll(0);
+            m.TopMid = m.MidLeft = m.MidRight = m.BottomMid = -1;
+            m.Pixel = -4;
+            m.Offset = 127;
+
+            return BitmapFilter.Conv3x3(b, m);
+        }
+
+        public static bool EdgeEnhance(Bitmap b)
+        {
+            ConvMatrix m = new ConvMatrix();
+            m.MidLeft = -1;
+            m.Offset = 127;
+
+            return BitmapFilter.Conv3x3(b, m);
         }
     }
 }

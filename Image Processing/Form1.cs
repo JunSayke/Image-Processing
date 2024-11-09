@@ -1,3 +1,4 @@
+using HNUDIP;
 using ImageProcess2;
 using WebCamLib;
 
@@ -23,7 +24,19 @@ namespace Image_Processing
             Rotate,
             Scale,
             Binary,
-            Sepia
+            Sepia,
+            Smoothing,
+            Sharpening,
+            EdgeEnhance,
+            EdgeDetect,
+            EmbossLaplacian,
+            MeanRemoval,
+            GaussianBlur,
+            EmbossHorzVert,
+            EmbossAllDir,
+            EmbossLossy,
+            EmbossHorz,
+            EmbossVert,
         }
 
         public Form1()
@@ -99,6 +112,19 @@ namespace Image_Processing
             ApplyFilter();
         }
 
+        private void trackBar2_Scroll(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.Contrast;
+            ApplyFilter();
+        }
+
+        private void trackBar3_Scroll(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.Rotate;
+            ApplyFilter();
+        }
+
+
         private void contrastToolStripMenuItem_Click(object sender, EventArgs e)
         {
             currentFilter = FILTER.Contrast;
@@ -117,12 +143,6 @@ namespace Image_Processing
             ApplyFilter();
         }
 
-        private void trackBar3_Scroll(object sender, EventArgs e)
-        {
-            currentFilter = FILTER.Rotate;
-            ApplyFilter();
-        }
-
         private void binaryToolStripMenuItem_Click(object sender, EventArgs e)
         {
             currentFilter = FILTER.Binary;
@@ -132,6 +152,78 @@ namespace Image_Processing
         private void sepiaToolStripMenuItem_Click(object sender, EventArgs e)
         {
             currentFilter = FILTER.Sepia;
+            ApplyFilter();
+        }
+
+        private void smoothToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.Smoothing;
+            ApplyFilter();
+        }
+
+        private void sharpenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.Sharpening;
+            ApplyFilter();
+        }
+
+        private void meanRemovalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.MeanRemoval;
+            ApplyFilter();
+        }
+
+        private void gaussianBlurToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.GaussianBlur;
+            ApplyFilter();
+        }
+
+        private void laplascianToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.EmbossLaplacian;
+            ApplyFilter();
+        }
+
+        private void horizontalVerticalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.EmbossHorzVert;
+            ApplyFilter();
+        }
+
+        private void allDirectionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.EmbossAllDir;
+            ApplyFilter();
+        }
+
+        private void lossyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.EmbossLossy;
+            ApplyFilter();
+        }
+
+        private void horizontalOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.EmbossHorz;
+            ApplyFilter();
+        }
+
+        private void verticalOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.EmbossVert;
+            ApplyFilter();
+        }
+
+        private void enhanceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.EdgeEnhance;
+            ApplyFilter();
+        }
+
+        private void detectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.EdgeDetect;
             ApplyFilter();
         }
 
@@ -161,7 +253,8 @@ namespace Image_Processing
 
         private void ApplyFilter()
         {
-            if (loaded == null) {
+            if (loaded == null)
+            {
                 MessageBox.Show("No image loaded", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -196,13 +289,61 @@ namespace Image_Processing
                     BasicDIP.Rotate(ref loaded, ref processed, trackBar3.Value);
                     break;
                 case FILTER.Scale:
-                    BasicDIP.Scale(ref loaded, ref processed, 1000, 1000);
+                    BasicDIP.Scale(ref loaded, ref processed, (int) weightInpt.Value, (int) heightInpt.Value);
                     break;
                 case FILTER.Binary:
                     BasicDIP.Binary(ref loaded, ref processed);
                     break;
                 case FILTER.Sepia:
                     BasicDIP.Sepia(ref loaded, ref processed);
+                    break;
+                case FILTER.Smoothing:
+                    processed = (Bitmap)loaded.Clone();
+                    BitmapFilter.Smooth(processed, 1);
+                    break;
+                case FILTER.Sharpening:
+                    processed = (Bitmap)loaded.Clone();
+                    BitmapFilter.Sharpen(processed, 1);
+                    break;
+                case FILTER.EdgeEnhance:
+                    processed = (Bitmap)loaded.Clone();
+                    BasicDIP.EdgeEnhance(processed);
+                    break;
+                case FILTER.EdgeDetect:
+                    processed = (Bitmap)loaded.Clone();
+                    BasicDIP.EdgeDetect(processed);
+                    break;
+                case FILTER.EmbossLaplacian:
+                    processed = (Bitmap)loaded.Clone();
+                    BitmapFilter.EmbossLaplacian(processed);
+                    break;
+                case FILTER.MeanRemoval:
+                    processed = (Bitmap)loaded.Clone();
+                    BitmapFilter.MeanRemoval(processed, 9);
+                    break;
+                case FILTER.GaussianBlur:
+                    processed = (Bitmap)loaded.Clone();
+                    BitmapFilter.GaussianBlur(processed, 4);
+                    break;
+                case FILTER.EmbossHorzVert:
+                    processed = (Bitmap)loaded.Clone();
+                    BasicDIP.Emboss(processed, BasicDIP.EMBOSS.HORIZONTAL_VERTICAL);
+                    break;
+                case FILTER.EmbossAllDir:
+                    processed = (Bitmap)loaded.Clone();
+                    BasicDIP.Emboss(processed, BasicDIP.EMBOSS.ALL_DIRECTION);
+                    break;
+                case FILTER.EmbossLossy:
+                    processed = (Bitmap)loaded.Clone();
+                    BasicDIP.Emboss(processed, BasicDIP.EMBOSS.LOSSY);
+                    break;
+                case FILTER.EmbossHorz:
+                    processed = (Bitmap)loaded.Clone();
+                    BasicDIP.Emboss(processed, BasicDIP.EMBOSS.HORIZONTAL_ONLY);
+                    break;
+                case FILTER.EmbossVert:
+                    processed = (Bitmap)loaded.Clone();
+                    BasicDIP.Emboss(processed, BasicDIP.EMBOSS.VERTICAL_ONLY);
                     break;
                 default:
                     break;
@@ -221,6 +362,12 @@ namespace Image_Processing
         {
             mgaDevice[0].Stop();
             webcamLoop.Enabled = false;
+        }
+
+        private void scaleBtn_Click(object sender, EventArgs e)
+        {
+            currentFilter = FILTER.Scale;
+            ApplyFilter();
         }
     }
 }
