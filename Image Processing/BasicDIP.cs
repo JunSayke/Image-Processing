@@ -11,46 +11,67 @@ namespace Image_Processing
 {
     class BasicDIP
     {
-        public static void PixelCopy(ref Bitmap a, ref Bitmap b)
+        public static void PixelCopy(Bitmap a)
         {
-            b = new Bitmap(a.Width, a.Height);
             for (int x = 0; x < a.Width; x++)
             {
                 for (int y = 0; y < a.Height; y++)
                 {
-                    b.SetPixel(x, y, a.GetPixel(x, y));
+                    a.SetPixel(x, y, a.GetPixel(x, y));
                 }
             }
         }
 
-        public static void Inversion(ref Bitmap a, ref Bitmap b)
+        public static void Inversion(Bitmap a)
         {
-            b = new Bitmap(a.Width, a.Height);
             for (int x = 0; x < a.Width; x++)
             {
                 for (int y = 0; y < a.Height; y++)
                 {
                     Color pixel = a.GetPixel(x, y);
-                    b.SetPixel(x, y, Color.FromArgb(255 - pixel.R, 255 - pixel.G, 255 - pixel.B));
+                    a.SetPixel(x, y, Color.FromArgb(255 - pixel.R, 255 - pixel.G, 255 - pixel.B));
                 }
             }
         }
 
-        public static void MirrorVertical(ref Bitmap a, ref Bitmap b)
+        public static void MirrorVertical(Bitmap a)
         {
-            b = new Bitmap(a.Width, a.Height);
-            for (int x = 0; x < a.Width; x++)
+            int width = a.Width;
+            int height = a.Height;
+
+            for (int x = 0; x < width; x++)
             {
-                for (int y = 0; y < a.Height; y++)
+                for (int y = 0; y < height / 2; y++)
                 {
-                    b.SetPixel(x, y, a.GetPixel(x, a.Height - 1 - y));
+                    Color topPixel = a.GetPixel(x, y);
+                    Color bottomPixel = a.GetPixel(x, height - 1 - y);
+
+                    a.SetPixel(x, y, bottomPixel);
+                    a.SetPixel(x, height - 1 - y, topPixel);
                 }
             }
         }
 
-        public static void Binary(ref Bitmap a, ref Bitmap b)
+        public static void MirrorHorizontal(Bitmap a)
         {
-            b = new Bitmap(a.Width, a.Height);
+            int width = a.Width;
+            int height = a.Height;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width / 2; x++)
+                {
+                    Color leftPixel = a.GetPixel(x, y);
+                    Color rightPixel = a.GetPixel(width - 1 - x, y);
+
+                    a.SetPixel(x, y, rightPixel);
+                    a.SetPixel(width - 1 - x, y, leftPixel);
+                }
+            }
+        }
+
+        public static void Binary(Bitmap a)
+        {
             for (int x = 0; x < a.Width; x++)
             {
                 for (int y = 0; y < a.Height; y++)
@@ -59,18 +80,17 @@ namespace Image_Processing
                     int gray = (pixel.R + pixel.G + pixel.B) / 3;
                     if (gray > 127)
                     {
-                        b.SetPixel(x, y, Color.White);
+                        a.SetPixel(x, y, Color.White);
                     }
                     else
                     {
-                        b.SetPixel(x, y, Color.Black);
+                        a.SetPixel(x, y, Color.Black);
                     }
                 }
             }
         }
 
-        public static void Sepia(ref Bitmap a, ref Bitmap b) {
-            b = new Bitmap(a.Width, a.Height);
+        public static void Sepia(Bitmap a) {
             Color pixel;
             for (int x = 0; x < a.Width; x++)
             {
@@ -81,19 +101,7 @@ namespace Image_Processing
                     int green = Math.Min(255, (int)(0.349 * pixel.R + 0.686 * pixel.G + 0.168 * pixel.B));
                     int blue = Math.Min(255, (int)(0.272 * pixel.R + 0.534 * pixel.G + 0.131 * pixel.B));
 
-                    b.SetPixel(x, y, Color.FromArgb(red, green, blue));
-                }
-            }
-        }
-
-        public static void MirrorHorizontal(ref Bitmap a, ref Bitmap b) 
-        {
-            b = new Bitmap(a.Width, a.Height);
-            for (int x = 0; x < a.Width; x++)
-            {
-                for (int y = 0; y < a.Height; y++)
-                {
-                    b.SetPixel(x, y, a.GetPixel(a.Width - 1 - x, y));
+                    a.SetPixel(x, y, Color.FromArgb(red, green, blue));
                 }
             }
         }
@@ -117,14 +125,14 @@ namespace Image_Processing
                 }
         }
 
-        public static void Scale(ref Bitmap a, ref Bitmap b, int nwidth, int nheight)
+        public static void Scale(ref Bitmap a, int nwidth, int nheight)
         {
             int targetWidth = nwidth;
             int targetHeight = nheight;
             int xTarget, yTarget, xSource, ySource;
             int width = a.Width;
             int height = a.Height;
-            b = new Bitmap(targetWidth, targetHeight);
+            Bitmap b = new Bitmap(targetWidth, targetHeight);
 
             for (xTarget = 0; xTarget < targetWidth; xTarget++)
             {
@@ -135,10 +143,11 @@ namespace Image_Processing
                     b.SetPixel(xTarget, yTarget, a.GetPixel(xSource, ySource));
                 }
             }
+            a = b;
         }
 
 
-        public static void Rotate(ref Bitmap a, ref Bitmap b, int value)
+        public static void Rotate(ref Bitmap a, int value)
         {
             //float angleRadians = (float)(value * Math.PI / 180);
             float angleRadians = (float)value;
@@ -150,7 +159,7 @@ namespace Image_Processing
             sinA = (float)Math.Sin(angleRadians);
             width = a.Width;
             height = a.Height;
-            b = new Bitmap(width, height);
+            Bitmap b = new Bitmap(width, height);
             for (xp = 0; xp < width; xp++)
             {
                 for (yp = 0; yp < height; yp++)
@@ -168,9 +177,10 @@ namespace Image_Processing
                     b.SetPixel(xp, yp, a.GetPixel(xs, ys));
                 }
             }
+            a = b;
         }
 
-        public static void Equalisation(ref Bitmap a, ref Bitmap b, int degree)
+        public static void Equalisation(Bitmap a, int degree)
         {
             int height = a.Height;
             int width = a.Width;
@@ -226,24 +236,21 @@ namespace Image_Processing
                 }
             }
 
-            b = new Bitmap(width, height);
             // enhance the region by remapping the intensities
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
                     Color color = Color.FromArgb(Ymap[a.GetPixel(x, y).R], Ymap[a.GetPixel(x, y).R], Ymap[a.GetPixel(x, y).R]);
-                    b.SetPixel(x, y, color);
+                    a.SetPixel(x, y, color);
                 }
             }
         }
 
-        public static void Brightness(ref Bitmap a, ref Bitmap b, int value)
+        public static void Brightness(Bitmap a, int value)
         {
             Color sample;
             int red, green, blue;
-
-            b = new Bitmap(a.Width, a.Height);
 
             for (int x = 0; x < a.Width; x++)
             {
@@ -258,12 +265,12 @@ namespace Image_Processing
                     green = Math.Max(0, Math.Min(255, green));
                     blue = Math.Max(0, Math.Min(255, blue));
 
-                    b.SetPixel(x, y, Color.FromArgb(red, green, blue));
+                    a.SetPixel(x, y, Color.FromArgb(red, green, blue));
                 }
             }
         }
 
-        public static void Hist(ref Bitmap a, ref Bitmap b)
+        public static void Hist(Bitmap a)
         {
             // Create a copy of the original image to work on
             Bitmap temp = new Bitmap(a);
@@ -294,21 +301,21 @@ namespace Image_Processing
                 }
             }
 
-            b = new Bitmap(256, 800);
+            a = new Bitmap(256, 800);
             for (int x = 0; x < 256; x++)
             {
                 for (int y = 0; y < 800; y++)
                 {
-                    b.SetPixel(x, y, Color.White);
+                    a.SetPixel(x, y, Color.White);
                 }
             }
 
             // plotting points based from histdata
             for (int x = 0; x < 256; x++)
             {
-                for (int y = 0; y < Math.Min(histdata[x] / 5, b.Height - 1); y++)
+                for (int y = 0; y < Math.Min(histdata[x] / 5, a.Height - 1); y++)
                 {
-                    b.SetPixel(x, (b.Height - 1) - y, Color.Black);
+                    a.SetPixel(x, (a.Height - 1) - y, Color.Black);
                 }
             }
         }
@@ -316,7 +323,7 @@ namespace Image_Processing
         public enum EMBOSS { HORIZONTAL_VERTICAL, ALL_DIRECTION, LOSSY, HORIZONTAL_ONLY, VERTICAL_ONLY };
         
 
-        public static bool Emboss(Bitmap b, EMBOSS nType)
+        public static bool Emboss(Bitmap a, EMBOSS nType)
         {
             ConvMatrix m = new ConvMatrix();
 
@@ -353,10 +360,10 @@ namespace Image_Processing
                     break;
             }
 
-            return BitmapFilter.Conv3x3(b, m);
+            return BitmapFilter.Conv3x3(a, m);
         }
 
-        public static bool EdgeDetect(Bitmap b)
+        public static bool EdgeDetect(Bitmap a)
         {
             ConvMatrix m = new ConvMatrix();
             m.SetAll(0);
@@ -364,16 +371,16 @@ namespace Image_Processing
             m.Pixel = -4;
             m.Offset = 127;
 
-            return BitmapFilter.Conv3x3(b, m);
+            return BitmapFilter.Conv3x3(a, m);
         }
 
-        public static bool EdgeEnhance(Bitmap b)
+        public static bool EdgeEnhance(Bitmap a)
         {
             ConvMatrix m = new ConvMatrix();
             m.MidLeft = -1;
             m.Offset = 127;
 
-            return BitmapFilter.Conv3x3(b, m);
+            return BitmapFilter.Conv3x3(a, m);
         }
     }
 }

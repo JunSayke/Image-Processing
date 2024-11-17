@@ -51,9 +51,7 @@ namespace Image_Processing
                     }
                 }
                 
-                Bitmap newImageA = new Bitmap(imageB.Width, imageB.Height);
-                BasicDIP.Scale(ref imageA, ref newImageA, imageB.Width, imageB.Height);
-                imageA = newImageA;
+                BasicDIP.Scale(ref imageA, imageB.Width, imageB.Height);
             }
 
             Bitmap output = new Bitmap(imageA.Width, imageA.Height);
