@@ -270,7 +270,7 @@ namespace Image_Processing
             }
         }
 
-        public static void Hist(Bitmap a)
+        public static void Hist(ref Bitmap a)
         {
             // Create a copy of the original image to work on
             Bitmap temp = new Bitmap(a);

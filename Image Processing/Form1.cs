@@ -59,6 +59,7 @@ namespace Image_Processing
         {
             loaded = new Bitmap(openFileDialog1.FileName);
             processed = (Bitmap)loaded.Clone();
+            previous = (Bitmap)processed.Clone();
             pictureBox1.Image = loaded;
             if (webcamLoop.Enabled)
             {
@@ -127,8 +128,6 @@ namespace Image_Processing
                 return;
             }
 
-            previous = (Bitmap)processed.Clone();
-
             switch (filter)
             {
                 case FILTER.PixelCopy:
@@ -141,7 +140,7 @@ namespace Image_Processing
                     BasicDIP.Inversion(processed);
                     break;
                 case FILTER.Histogram:
-                    BasicDIP.Hist(processed);
+                    BasicDIP.Hist(ref processed);
                     break;
                 case FILTER.Brightness:
                     BasicDIP.Brightness(processed, trackBar1.Value);
@@ -186,7 +185,7 @@ namespace Image_Processing
                     BitmapFilter.MeanRemoval(processed, 9);
                     break;
                 case FILTER.GaussianBlur:
-                    BitmapFilter.GaussianBlur(processed, 200);
+                    BitmapFilter.GaussianBlur(processed, 5);
                     break;
                 case FILTER.EmbossHorzVert:
                     BasicDIP.Emboss(processed, BasicDIP.EMBOSS.HORIZONTAL_VERTICAL);
@@ -207,13 +206,13 @@ namespace Image_Processing
                     quadrantFilter(processed);
                     break;
                 case FILTER.EdgeDetectSobel:
-                    BitmapFilter.EdgeDetectConvolution(processed, BitmapFilter.EDGE_DETECT_SOBEL, 200);
+                    BitmapFilter.EdgeDetectConvolution(processed, BitmapFilter.EDGE_DETECT_SOBEL, 5);
                     break;
                 case FILTER.EdgeDetectPrewitt:
-                    BitmapFilter.EdgeDetectConvolution(processed, BitmapFilter.EDGE_DETECT_PREWITT, 200);
+                    BitmapFilter.EdgeDetectConvolution(processed, BitmapFilter.EDGE_DETECT_PREWITT, 5);
                     break;
                 case FILTER.EdgeDetectKirsh:
-                    BitmapFilter.EdgeDetectConvolution(processed, BitmapFilter.EDGE_DETECT_KIRSH, 200);
+                    BitmapFilter.EdgeDetectConvolution(processed, BitmapFilter.EDGE_DETECT_KIRSH, 5);
                     break;
                 case FILTER.EdgeDetectQuick:
                     BitmapFilter.EdgeDetectQuick(processed);
@@ -227,7 +226,10 @@ namespace Image_Processing
 
             if (!stackable)
             {
-                processed = previous;
+                processed = (Bitmap)previous.Clone();
+            } else
+            {
+                previous = (Bitmap)processed.Clone();
             }
         }
 
@@ -438,6 +440,7 @@ namespace Image_Processing
             if (stackable)
             {
                 stackable = false;
+                previous = (Bitmap)processed.Clone();
                 UpdateStackableStatus();
             }
         }
@@ -445,6 +448,7 @@ namespace Image_Processing
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
             processed = (Bitmap)loaded.Clone();
+            previous = (Bitmap)processed.Clone();
             ApplyFilter(FILTER.PixelCopy);
         }
 
