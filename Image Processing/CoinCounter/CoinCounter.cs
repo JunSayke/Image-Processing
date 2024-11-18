@@ -1,63 +1,96 @@
-﻿using System.Collections.Concurrent;
+﻿using Image_Processing;
+using ImageProcess2;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace HoughCoinCounter
 {
     internal class CoinCounter
     {
-        private readonly HoughCircle houghCircle;
-        private readonly List<CoinType> coinTypes;
-        private readonly object lockObject = new object();
+        private readonly List<DenominationData> denominationDatas;
 
-        public CoinCounter(List<CoinType> coinTypes)
+        internal class DenominationData
         {
-            this.houghCircle = new HoughCircle();
-            this.coinTypes = coinTypes;
+            public int Radius { set; get; }
+            public decimal Value { set; get; }
+            public int Threshold { set; get; }
+
+            public int SuppressionRadius { set; get; }
         }
 
-        // OPTIMIZE: Instead of using threading it could be better to improve the HoughCircle class to allow for multiple radii
-        public (decimal totalValue, List<(Point center, decimal value)> detectedCoins, Dictionary<decimal, int> coinCounts) CountTotalValue(Bitmap img, int suppressionRadius = 10)
+        private decimal totalValue = 0;
+        private Dictionary<decimal, List<Point>> detectedCoins = new Dictionary<decimal, List<Point>>();
+        private Dictionary<decimal, int[,]> accumulators = new Dictionary<decimal, int[,]>();
+        public decimal TotalValue { get => totalValue; }
+        public Dictionary<decimal, List<Point>> DetectedCoins { get => detectedCoins; }
+        public Dictionary<decimal, int[,]> Accumulators { get => accumulators; }
+
+
+        public CoinCounter(List<DenominationData> denominationDatas)
         {
-            decimal totalValue = 0;
-            List<(Point center, decimal value)> detectedCoins = new List<(Point center, decimal value)>();
-            Dictionary<decimal, int> coinCounts = new Dictionary<decimal, int>();
+            this.denominationDatas = denominationDatas;
+        }
 
-            // Use a concurrent dictionary for efficient thread-safe updates
-            var coinCountDict = new ConcurrentDictionary<decimal, int>();
+        private void clear()
+        {
+            this.totalValue = 0;
+            this.detectedCoins.Clear();
+            this.accumulators.Clear();
+        }
 
-            // Process each coinType in parallel to improve performance
-            Parallel.ForEach(coinTypes, coinType =>
+        public void CountCoins(Bitmap image, bool visualize = false) 
+        {
+            clear();
+
+
+            foreach(var denominationData in this.denominationDatas)
             {
-                int[,] accumulator;
-                lock (lockObject)
-                {
-                    accumulator = houghCircle.GetAccumulator(img, coinType.Radius);
-                }
-
-                List<Point> circles = houghCircle.SearchCircles(accumulator, coinType.Threshold, suppressionRadius);
-
-                foreach (var circle in circles)
-                {
-                    // Accumulate total value and add detected coins
-                    lock (lockObject)
-                    {
-                        totalValue += coinType.Value;
-                        detectedCoins.Add((circle, coinType.Value));
-                    }
-
-                    // Efficiently update the coinCounts using ConcurrentDictionary
-                    coinCountDict.AddOrUpdate(coinType.Value, 1, (key, oldValue) => oldValue + 1);
-                }
-            });
-
-            // Convert concurrent dictionary to normal dictionary for final result
-            foreach (var coinCount in coinCountDict)
-            {
-                coinCounts[coinCount.Key] = coinCount.Value;
+                int[,] accumulator = HoughCircle.GetAccumulator(image, denominationData.Radius);
+                this.accumulators[denominationData.Value] = accumulator;
+                List<Point> centers = HoughCircle.SearchCircles(accumulator, denominationData.Threshold, denominationData.SuppressionRadius);
+                this.totalValue += centers.Count * denominationData.Value;
+                this.detectedCoins[denominationData.Value] = centers;
             }
 
-            return (totalValue, detectedCoins, coinCounts);
+            if (visualize)
+            {
+                foreach (var accumulator in this.accumulators)
+                {
+                    ShowVisualizations(accumulator.Value, accumulator.Key.ToString(), new Size(800, 800));
+                }
+            }
+        }
+
+        public Bitmap PreprocessImage(Bitmap image)
+        {
+            Bitmap temp = (Bitmap)image.Clone();
+            BitmapFilter.GrayScale(temp);
+            BitmapFilter.GaussianBlur(temp, 5);
+            BasicDIP.Binary(temp);
+            BitmapFilter.EdgeDetectConvolution(temp, BitmapFilter.EDGE_DETECT_SOBEL, 5);
+            return temp;
+        }
+
+        public void ShowVisualizations(int[,] accumulator, string label, Size size)
+        {
+            Bitmap accumulatorBitmap = HoughCircle.VisualizeAccumulator(accumulator);
+            Form accumulatorForm = new Form
+            {
+                Text = $"Accumulator Visualization for {label}",
+                ClientSize = new Size(size.Width + 200, size.Height + 200)
+            };
+            PictureBox accumulatorPictureBox = new PictureBox
+            {
+                Image = accumulatorBitmap,
+                Size = size,
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Dock = DockStyle.Fill
+            };
+            accumulatorForm.Controls.Add(accumulatorPictureBox);
+            accumulatorForm.Show();
         }
     }
 }

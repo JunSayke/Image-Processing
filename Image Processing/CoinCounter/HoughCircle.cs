@@ -1,27 +1,25 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 
 namespace HoughCoinCounter
 {
-    // TODO: Multiple radii for each coin type
     internal class HoughCircle
     {
-        private int edgePixel = 255;
-        public int EdgePixel { get => edgePixel; set => edgePixel = value; }
-
-        public List<Point> SearchCircles(int[,] accumulator, int threshold, int supressionRadius = 10)
+        public static List<Point> SearchCircles(int[,] accumulator, int threshold, int supressionRadius = 10)
         {
+            int[,] temp = (int[,])accumulator.Clone(); // Prevent overriding the original 2D array
             List<Point> circles = new List<Point>();
-            int rows = accumulator.GetLength(0);
-            int cols = accumulator.GetLength(1);
+            int rows = temp.GetLength(0);
+            int cols = temp.GetLength(1);
 
             // Loop through all points in the accumulator
             for (int y = 0; y < rows; y++)
             {
                 for (int x = 0; x < cols; x++)
                 {
-                    int totalVotes = accumulator[y, x];
+                    int totalVotes = temp[y, x];
                     if (totalVotes < threshold)
                         continue; // Skip points below the threshold
 
@@ -41,14 +39,14 @@ namespace HoughCoinCounter
                             // Ensure neighbor is within bounds
                             if (neighborX >= 0 && neighborX < cols && neighborY >= 0 && neighborY < rows)
                             {
-                                int neighborVotes = accumulator[neighborY, neighborX];
+                                int neighborVotes = temp[neighborY, neighborX];
                                 if (neighborVotes > totalVotes)
                                 {
                                     isLocalMaximum = false;
                                     break;
                                 } else
                                 {
-                                    accumulator[neighborY, neighborX] = 0; // Suppress the neighbor
+                                    temp[neighborY, neighborX] = 0; // Suppress the neighbor
                                 }
                             }
                         }
@@ -65,7 +63,7 @@ namespace HoughCoinCounter
                     else
                     {
                         // Set the current point to 0 (suppressed)
-                        accumulator[y, x] = 0;
+                        temp[y, x] = 0;
                     }
                 }
             }
@@ -73,8 +71,7 @@ namespace HoughCoinCounter
             return circles;
         }
 
-
-        public int[,] GetAccumulator(Bitmap img, int radius)
+        public static int[,] GetAccumulator(Bitmap img, int radius, int edgePixel = 255)
         {
             int rows = img.Height;
             int cols = img.Width;
@@ -105,5 +102,35 @@ namespace HoughCoinCounter
 
             return accumulator;
         }
+
+        public static Bitmap VisualizeAccumulator(int[,] accumulator)
+        {
+            int rows = accumulator.GetLength(0);
+            int cols = accumulator.GetLength(1);
+            Bitmap visualization = new Bitmap(cols, rows);
+
+            // Find the maximum value in the accumulator to normalize the colors
+            int maxVotes = 0;
+            foreach (var vote in accumulator)
+            {
+                maxVotes = Math.Max(maxVotes, vote);
+            }
+
+            for (int y = 0; y < rows; y++)
+            {
+                for (int x = 0; x < cols; x++)
+                {
+                    int totalVotes = accumulator[y, x];
+                    // Normalize the vote count to a range between 0 and 255 for the intensity
+                    int colorIntensity = (int)((double)totalVotes / maxVotes * 255);
+                    // Create a color based on the intensity (light red to really red gradient)
+                    Color color = Color.FromArgb(255, colorIntensity, 0, 0);
+                    visualization.SetPixel(x, y, color);
+                }
+            }
+
+            return visualization;
+        }
+
     }
 }

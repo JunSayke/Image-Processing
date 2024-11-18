@@ -22,7 +22,6 @@ namespace Image_Processing
             InitializeComponent();
         }
 
-        // HACK: Cleanup the code pag may time
         private void button1_Click(object sender, EventArgs e)
         {
             if (loaded == null)
@@ -31,58 +30,60 @@ namespace Image_Processing
                 return;
             }
 
-            processed = (Bitmap)loaded.Clone();
-
-            // Preprocess the image
-            BitmapFilter.GrayScale(processed);
-            BitmapFilter.GaussianBlur(processed, 5);
-            BasicDIP.Binary(processed);
-            BitmapFilter.EdgeDetectConvolution(processed, BitmapFilter.EDGE_DETECT_SOBEL, 5);
-
-            // Define the coin types with their respective radii and values
-            List<CoinType> coinTypes = new List<CoinType>
+            // Step 1: Define the coin types
+            var denominationDatas = new List<CoinCounter.DenominationData>
             {
-                // CoinType(radius, value, threshold)
-                new CoinType(80, 5.00m, 150), // 5 Peso coin
-                new CoinType(70, 1.00m, 150), // 1 Peso coin
-                new CoinType(60, 0.25m, 150), // 25 Cent coin
-                new CoinType(50, 0.10m, 180), // 10 Cent coin
-                new CoinType(45, 0.05m, 180)  // 5 Cent coin
+                new CoinCounter.DenominationData { Radius = 80, Value = 5.00m, Threshold = 150, SuppressionRadius = 20 },
+                new CoinCounter.DenominationData { Radius = 70, Value = 1.00m, Threshold = 150, SuppressionRadius = 15 },
+                new CoinCounter.DenominationData { Radius = 60, Value = 0.25m, Threshold = 150, SuppressionRadius = 10 },
+                new CoinCounter.DenominationData { Radius = 50, Value = 0.10m, Threshold = 180, SuppressionRadius = 5 },
+                new CoinCounter.DenominationData { Radius = 45, Value = 0.05m, Threshold = 180, SuppressionRadius = 5 }
+                // Add more denominations as needed
             };
 
-            // Initialize the CoinCounter with the defined coin types
-            CoinCounter coinCounter = new CoinCounter(coinTypes);
+            // Step 2: Create an instance of CoinCounter
+            var coinCounter = new CoinCounter(denominationDatas);
 
-            // Count the total value of the coins in the processed image
-            int suppressionRadius = 10; // Adjust as needed
-            var (totalValue, detectedCoins, coinCounts) = coinCounter.CountTotalValue(processed, suppressionRadius);
+            processed = coinCounter.PreprocessImage(loaded);
 
-            // Display the total value of the coins
-            MessageBox.Show($"Total value of coins: {totalValue:C}", "Coin Counter");
+            // Step 4: Count the coins
+            coinCounter.CountCoins(processed, visualize: true);
 
-            // Display the count for each denomination
-            StringBuilder countsMessage = new StringBuilder("Coin counts:\n");
-            int totalCoins = 0;
-            foreach (var coinCount in coinCounts)
-            {
-                countsMessage.AppendLine($"{coinCount.Key:C}: {coinCount.Value}");
-                totalCoins += coinCount.Value;
-            }
-            countsMessage.AppendLine($"\nTotal coins found: {totalCoins}");
-            MessageBox.Show(countsMessage.ToString(), "Coin Counts");
+            // Step 5: Access the results
+            decimal totalValue = coinCounter.TotalValue;
+            var detectedCoins = coinCounter.DetectedCoins;
+            var accumulators = coinCounter.Accumulators;
 
             // Draw the detected circles and their values on the image
             PenGraphic pen = new PenGraphic();
-            foreach (var (center, value) in detectedCoins)
+            foreach (var (key, centers) in detectedCoins)
             {
-                using (Graphics g = Graphics.FromImage(processed))
+                foreach (var center in centers)
                 {
-                    pen.Draw(g, center, value.ToString("C"));
+                    using (Graphics g = Graphics.FromImage(processed))
+                    {
+                        pen.Draw(g, center, key.ToString("C"));
+                    }
                 }
             }
 
             // Show the image with circles drawn
             pictureBox1.Image = processed;
+
+            // Build the message string
+            StringBuilder message = new StringBuilder();
+            int totalCount = 0;
+            foreach (var (key, centers) in detectedCoins)
+            {
+                int count = centers.Count();
+                message.AppendLine($"Denomination: {key:C}, Count: {count}");
+                totalCount += count;
+            }
+            message.AppendLine($"Total Count: {totalCount}");
+            message.AppendLine($"Total Value: {totalValue:C}");
+
+            // Show the message box
+            MessageBox.Show(message.ToString(), "Coin Count Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
